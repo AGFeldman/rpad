@@ -1,0 +1,55 @@
+I found out about python curses library while looking into this
+
+set conceallevel=1
+set concealcursor=nvic
+hi clear Conceal
+syntax match Entity /\S/ conceal cchar=*
+
+see http://stackoverflow.com/questions/9604011/in-vim-how-to-keep-characters-concealed-even-when-cursor-enters-that-line
+http://stackoverflow.com/questions/10383373/how-to-make-words-invisible-in-vim
+
+
+emphasis: focus on the common case
+
+entries are individual files. This makes isolation / consistency possible. These files are immutable once written. Use vim -M to open a file in read-only.
+
+necessary files are written in an encfs directory.
+
+have several different scripts. no hotkeys: just run the scripts on a path, or cd to the directory.
+
+add_entry_visible:
+add_entry_invisible:
+    use vim to have text appear on screen, but non-whitespace characters are masked.
+open_running_pad: (if host is not fire, then this is opened read-only)
+    if host is fire:
+        assemble, open, commit any changes
+    if host is not fire:
+        assemble a *guess*, open read-only, trash the guess
+        (in fact, this can be a separate script, "open_guess")
+
+the running_pad document itself is version controlled, in a git repo. fire periodically, automatically merges entries into it, and then moves the entries to a "DONE" folder. additionally, the running_pad can be edited by open_running_pad, if run on fire.
+
+in fact, scripts could chmod files before and after working with them, so the files are read-only except when then need to support writes.
+
+could even try to record location by doing stuff like http://stackoverflow.com/questions/24906833/get-your-location-through-python
+
+the file names for the entries should be unix-time-milliseconds_random-string
+
+could also log when i just view the file
+
+should protect the encfs thing with a strong password, and keep the directory unlocked most of the time
+
+alais rs to entry_show
+alias rh to entry_hide
+
+i should pay attention to usage details. like, with the current system, i often look away while typing in hidden mode, and i guess i sometimes have positive feelings about that.
+
+setup:
+encfs /d/.rpad_enc /home/aaron/rpad_dec
+# use with `fusermount -u ~/rpad_dec`
+mkdir /home/aaron/rpad_dec/entries
+in ~/.bash_aliases:
+alias rs="python /d/Coding/rpad/entry_show.py"
+alias rh="python /d/Coding/rpad/entry_hide.py"
+
+after running the script, it could tell you how long you spent writing. heck, it could give you stats from, say, the last week.
