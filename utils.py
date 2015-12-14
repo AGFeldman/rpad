@@ -5,11 +5,16 @@ import platform
 import os
 import binascii
 import sys
+import shutil
 
 
 ENC_PATH = '/d/.rpad_enc/'
 DEC_PATH = '/home/aaron/rpad_dec/'
+DEC_GIT_PATH = DEC_PATH + '/.git'
+MERGED_RPAD_PATH = DEC_PATH + '/merged_rpad.txt'
+TMP_MERGED_RPAD_PATH = MERGED_RPAD_PATH + '.tmp'
 ENTRIES_PATH = DEC_PATH + '/entries/'
+OLD_ENTRIES_PATH = DEC_PATH + '/old_entries/'
 
 
 def check_mounted():
@@ -74,3 +79,47 @@ def entry(visibility):
     text = '\n'.join((header(visibility), vim_input(visibility=visibility), footer()))
     with open(filename, 'w') as f:
         f.write(text)
+
+
+def git_commit(msg):
+    subprocess.call(['git',
+                     '-C', DEC_PATH,
+                     'commit',
+                     '-am',
+                     msg])
+    # TODO(agf): Return results based on whether this is successful
+
+def merge():
+    # TODO(agf): Should check that merged_rpad.txt isn't currently open in Vim
+    # TODO(agf): This should only be called on one device
+
+    # Get a list of entries to append to MERGED_RPAD_PATH
+    entry_filenames = []
+    for f in os.listdir(ENTRIES_PATH):
+        if os.path.isfile(os.path.join(ENTRIES_PATH, f)):
+            entry_filenames.append(f)
+    if not entry_filenames:
+        return
+
+    git_commit('state before merging entries')
+
+    # Sort entries into ascending order by time
+    entry_filenames.sort(key=lambda f: int(f.split('_')[0]))
+
+    # Append the entries to MERGED_RPAD_PATH
+    shutil.copy2(MERGED_RPAD_PATH, TMP_MERGED_RPAD_PATH)
+    with open(TMP_MERGED_RPAD_PATH, 'a') as tmp_rpad:
+        for entry_filename in entry_filenames:
+            tmp_rpad.write('\n\n')
+            with open(os.path.join(ENTRIES_PATH, entry_filename)) as entry_file:
+                for line in entry_file:
+                    tmp_rpad.write(line)
+    shutil.copy2(TMP_MERGED_RPAD_PATH, MERGED_RPAD_PATH)
+    os.remove(TMP_MERGED_RPAD_PATH)
+
+    # Move entries into OLD_ENTRIES_PATH
+    for entry_filename in entry_filenames:
+        os.rename(os.path.join(ENTRIES_PATH, entry_filename),
+                  os.path.join(OLD_ENTRIES_PATH, entry_filename))
+
+    git_commit('merged ' + str(entry_filenames))
