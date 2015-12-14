@@ -17,7 +17,7 @@ ENTRIES_PATH = DEC_PATH + '/entries/'
 OLD_ENTRIES_PATH = DEC_PATH + '/old_entries/'
 
 
-def check_mounted():
+def is_mounted():
     '''
     Returns True if and only if the encfs directory is unlocked.
     Might prompt the user to unlock it.
@@ -72,11 +72,15 @@ def entry_filename():
 
 
 def entry(visibility):
-    if not check_mounted():
+    if not is_mounted():
         sys.exit(1)
     filename = entry_filename()
-    # Use join instead of concatenating strings because vim_input() might be large
-    text = '\n'.join((header(visibility), vim_input(visibility=visibility), footer()))
+    header_ = header(visibility)
+    body = vim_input(visibility=visibility)
+    if not body:
+        return
+    footer_ = footer()
+    text = '\n'.join((header_, body, footer_))
     with open(filename, 'w') as f:
         f.write(text)
 
