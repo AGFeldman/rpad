@@ -10,6 +10,8 @@ import shutil
 
 ENC_PATH = '/d/.rpad_enc/'
 DEC_PATH = '/home/aaron/rpad_dec/'
+CONSISTENT_HOST = 'fire'
+
 DEC_GIT_PATH = DEC_PATH + '/.git'
 MERGED_RPAD_PATH = DEC_PATH + '/merged_rpad.txt'
 ENTRIES_PATH = DEC_PATH + '/entries/'
@@ -97,41 +99,49 @@ def git_commit(msg):
                      '-C', DEC_PATH,
                      'commit',
                      '-am',
-                     msg])
+                     '[auto-msg] ' + msg])
     # TODO(agf): Return results based on whether this is successful
 
-def merge():
-    # TODO(agf): Should check that merged_rpad.txt isn't currently open in Vim
-    # TODO(agf): This should only be called on one device
 
-    # Get a list of entries to append to MERGED_RPAD_PATH
+def view_and_maybe_edit():
+    is_consistent_host = hostname() == CONSISTENT_HOST
+
+    # Get a list of entries that are not yet appended to MERGED_RPAD_PATH
     entry_filenames = []
     for f in os.listdir(ENTRIES_PATH):
         if os.path.isfile(os.path.join(ENTRIES_PATH, f)):
             entry_filenames.append(f)
-    if not entry_filenames:
-        return
 
-    git_commit('state before merging entries')
-
-    # Sort entries into ascending order by time
-    entry_filenames.sort(key=lambda f: int(f.split('_')[0]))
-
-    # Append the entries to MERGED_RPAD_PATH
     tmp_path = tmp_merged_rpad_path()
     shutil.copy2(MERGED_RPAD_PATH, tmp_path)
-    with open(tmp_path, 'a') as tmp_rpad:
-        for entry_filename in entry_filenames:
-            tmp_rpad.write('\n\n')
-            with open(os.path.join(ENTRIES_PATH, entry_filename)) as entry_file:
-                for line in entry_file:
-                    tmp_rpad.write(line)
-    shutil.copy2(tmp_path, MERGED_RPAD_PATH)
+
+    if entry_filenames:
+        if is_consistent_host:
+            git_commit('state before merging entries')
+
+        # Sort entries into ascending order by time
+        entry_filenames.sort(key=lambda f: int(f.split('_')[0]))
+
+        # Append the entries to tmp_rpad
+        with open(tmp_path, 'a') as tmp_rpad:
+            for entry_filename in entry_filenames:
+                tmp_rpad.write('\n\n')
+                with open(os.path.join(ENTRIES_PATH, entry_filename)) as entry_file:
+                    for line in entry_file:
+                        tmp_rpad.write(line)
+
+        if is_consistent_host:
+            shutil.copy2(tmp_path, MERGED_RPAD_PATH)
+            git_commit('merged ' + str(entry_filenames))
+            # Move entries into OLD_ENTRIES_PATH
+            for entry_filename in entry_filenames:
+                os.rename(os.path.join(ENTRIES_PATH, entry_filename),
+                          os.path.join(OLD_ENTRIES_PATH, entry_filename))
+
+    if is_consistent_host:
+        subprocess.call(['vim', '+', MERGED_RPAD_PATH])
+        git_commit('manual edits')
+    else:
+        subprocess.call(['vim', '+', '-M', tmp_path])
+
     os.remove(tmp_path)
-
-    # Move entries into OLD_ENTRIES_PATH
-    for entry_filename in entry_filenames:
-        os.rename(os.path.join(ENTRIES_PATH, entry_filename),
-                  os.path.join(OLD_ENTRIES_PATH, entry_filename))
-
-    git_commit('merged ' + str(entry_filenames))
