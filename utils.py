@@ -12,9 +12,16 @@ ENC_PATH = '/d/.rpad_enc/'
 DEC_PATH = '/home/aaron/rpad_dec/'
 DEC_GIT_PATH = DEC_PATH + '/.git'
 MERGED_RPAD_PATH = DEC_PATH + '/merged_rpad.txt'
-TMP_MERGED_RPAD_PATH = MERGED_RPAD_PATH + '.tmp'
 ENTRIES_PATH = DEC_PATH + '/entries/'
 OLD_ENTRIES_PATH = DEC_PATH + '/old_entries/'
+
+
+def hostname():
+    return platform.node()
+
+
+def tmp_merged_rpad_path():
+    return MERGED_RPAD_PATH + '.' + hostname() + '.tmp.txt'
 
 
 def is_mounted():
@@ -32,7 +39,7 @@ def is_mounted():
 
 def vim_input(visibility='Show', initial_message=''):
     assert visibility == 'Show' or visibility == 'Hide' or visibility == 'Peep'
-    with tempfile.NamedTemporaryFile(suffix='.tmp') as tf:
+    with tempfile.NamedTemporaryFile(suffix='.tmp.txt') as tf:
         tf.write(initial_message)
         tf.flush()
         subprocess.call(['vim',
@@ -57,7 +64,7 @@ def time_str():
 
 
 def header(visibility):
-    return time_str() + ' host=' + platform.node() + ' mode=' + visibility
+    return time_str() + ' host=' + hostname() + ' mode=' + visibility
 
 
 def footer():
@@ -111,15 +118,16 @@ def merge():
     entry_filenames.sort(key=lambda f: int(f.split('_')[0]))
 
     # Append the entries to MERGED_RPAD_PATH
-    shutil.copy2(MERGED_RPAD_PATH, TMP_MERGED_RPAD_PATH)
-    with open(TMP_MERGED_RPAD_PATH, 'a') as tmp_rpad:
+    tmp_path = tmp_merged_rpad_path()
+    shutil.copy2(MERGED_RPAD_PATH, tmp_path)
+    with open(tmp_path, 'a') as tmp_rpad:
         for entry_filename in entry_filenames:
             tmp_rpad.write('\n\n')
             with open(os.path.join(ENTRIES_PATH, entry_filename)) as entry_file:
                 for line in entry_file:
                     tmp_rpad.write(line)
-    shutil.copy2(TMP_MERGED_RPAD_PATH, MERGED_RPAD_PATH)
-    os.remove(TMP_MERGED_RPAD_PATH)
+    shutil.copy2(tmp_path, MERGED_RPAD_PATH)
+    os.remove(tmp_path)
 
     # Move entries into OLD_ENTRIES_PATH
     for entry_filename in entry_filenames:
