@@ -125,10 +125,11 @@ def view_and_maybe_edit():
         # Append the entries to tmp_rpad
         with open(tmp_path, 'a') as tmp_rpad:
             for entry_filename in entry_filenames:
-                tmp_rpad.write('\n\n')
+                tmp_rpad.write('\n')
                 with open(os.path.join(ENTRIES_PATH, entry_filename)) as entry_file:
                     for line in entry_file:
                         tmp_rpad.write(line)
+                tmp_rpad.write('\n')
 
         if is_consistent_host:
             shutil.copy2(tmp_path, MERGED_RPAD_PATH)
