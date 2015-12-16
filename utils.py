@@ -58,6 +58,20 @@ def vim_input(visibility='Show', initial_message=''):
     return text.strip()
 
 
+def connection_info():
+    '''
+    If this script is run over ssh, connection_info() might return something like
+    'beavernet-162.caltech.edu'.
+    Returns None if the script is not run remotely.
+    '''
+    who_am_i = subprocess.Popen(
+            ['who', 'am', 'i'], stdout=subprocess.PIPE).stdout.readline().strip()
+    connection = who_am_i[who_am_i.index('(') + 1:who_am_i.index(')')]
+    if connection == ':0':
+        return None
+    return connection
+
+
 def time_str():
     '''
     Same format as `date` utility
@@ -66,7 +80,11 @@ def time_str():
 
 
 def header(visibility):
-    return time_str() + ' host=' + hostname() + ' mode=' + visibility
+    head_ = time_str() + ' host=' + hostname() + ' mode=' + visibility
+    connection = connection_info()
+    if connection:
+        head_ += ' connection=' + connection
+    return head_
 
 
 def footer():
