@@ -64,9 +64,16 @@ def connection_info():
     'beavernet-162.caltech.edu'.
     Returns None if the script is not run remotely.
     '''
+    # TODO(agf): Distinguish between the different cases when None is returned
     who_am_i = subprocess.Popen(
             ['who', 'am', 'i'], stdout=subprocess.PIPE).stdout.readline().strip()
-    connection = who_am_i[who_am_i.index('(') + 1:who_am_i.index(')')]
+    left_paren_index = who_am_i.find('(')
+    if left_paren_index == -1:
+        return None
+    right_paren_index = who_am_i.find(')')
+    if right_paren_index == -1 or right_paren_index < left_paren_index:
+        return None
+    connection = who_am_i[left_paren_index + 1:right_paren_index]
     if connection == ':0':
         return None
     return connection
