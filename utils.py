@@ -10,6 +10,7 @@ import shutil
 
 ENC_PATH = '/d/.rpad_enc/'
 DEC_PATH = '/home/aaron/rpad_dec/'
+# The name of the only host that is allowed to edit past entries with `ropen`
 CONSISTENT_HOST = 'fire'
 
 DEC_GIT_PATH = DEC_PATH + '/.git'
