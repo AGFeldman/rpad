@@ -129,6 +129,9 @@ def git_commit(msg):
 
 
 def view_and_maybe_edit():
+    if not is_mounted():
+        sys.exit(1)
+
     is_consistent_host = hostname() == CONSISTENT_HOST
 
     # Get a list of entries that are not yet appended to MERGED_RPAD_PATH
