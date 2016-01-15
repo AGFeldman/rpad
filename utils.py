@@ -20,6 +20,9 @@ DEC_GIT_PATH = DEC_PATH + '/.git'
 MERGED_RPAD_PATH = DEC_PATH + '/merged_rpad.txt'
 ENTRIES_PATH = DEC_PATH + '/entries/'
 OLD_ENTRIES_PATH = DEC_PATH + '/old_entries/'
+# If this changes, then modify `print_password.sh`
+PASSWORD_PATH = '/home/aaron/.passwords/rpad.password'
+PRINT_PASSWORD_PATH = '/home/aaron/Dropbox/Coding/rpad/print_password.sh'
 
 
 def hostname():
@@ -39,7 +42,13 @@ def is_mounted():
         # The encfs directory is already unlocked
         return True
     # Attempt to unlock the encfs directory
-    subprocess.call(['encfs', ENC_PATH, DEC_PATH])
+    if os.path.isfile(PASSWORD_PATH):
+        subprocess.call(['encfs',
+                         ENC_PATH,
+                         DEC_PATH,
+                         '--extpass=' + PRINT_PASSWORD_PATH])
+    else:
+        subprocess.call(['encfs', ENC_PATH, DEC_PATH])
     return os.path.ismount(DEC_PATH)
 
 

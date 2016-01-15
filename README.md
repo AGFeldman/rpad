@@ -57,3 +57,5 @@ echo 'alias ropen="python2 /YOUR_PATH/rpad/view_and_maybe_edit.py"' >> ~/.bash_a
 Now, to add an entry with text appearing on screen as you type, open a terminal and execute `rs`. To add an entry without text appearing on screen, execute `rh`. While writing an entry, try the Vim commands `Hide`, `Show`, and `Peep` to change the level of text visibility, and use `Help` to list these additional commands.
 
 To view all synced entries from BETA, execute `ropen`. You will not be able to edit any of the entries from BETA. To view and optionally edit synced entries from ALPHA, use the same `ropen` command. If you want to edit entries from BETA, ssh into ALPHA and use `ropen`.
+
+Optionally, you may set up this script to automatically read the encfs password from a file on your computer. To do this, modify `print_password.sh` and the `PASSWORD_PATH` and `PRINT_PASSWORD_PATH` variables in `utils.py`, and make `print_password.sh` executable with e.g. `chmod +x print_password.sh`.
