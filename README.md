@@ -1,6 +1,6 @@
 *A diary application that you can use on multiple machines without having your data clobbered by Dropbox consistency issues.*
 
-Note: At present, this is very specialized to my toolset. It has been tested on Ubuntu 14.04 and 15.10. It uses Vim 7.3 or higher for text editing, EncFS for encryption, and Git for version control. It is intended for use with Dropbox or other background-sync services.
+Note: At present, this is very specialized to my toolset. It has been tested on Ubuntu 14.04 and 15.10. Mac OS X is not supported. It uses Vim 7.3 or higher for text editing, EncFS for encryption, and Git for version control. It is intended for use with Dropbox or other background-sync services.
 
 **Features**
 - Add entries from any machine

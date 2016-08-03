@@ -11,18 +11,18 @@ import shutil
 # Edit for your own setup
 ENC_PATH = '/d/.rpad_enc/'
 # Edit for your own setup
-DEC_PATH = '/home/aaron/rpad_dec/'
+DEC_PATH = os.path.expanduser("~") + '/rpad_dec/'
 # The name of the only host that is allowed to edit past entries with `ropen`
 # Edit for your own setup
-CONSISTENT_HOST = 'fire'
+CONSISTENT_HOST = 'oxygen'
 
 DEC_GIT_PATH = DEC_PATH + '/.git'
 MERGED_RPAD_PATH = DEC_PATH + '/merged_rpad.txt'
 ENTRIES_PATH = DEC_PATH + '/entries/'
 OLD_ENTRIES_PATH = DEC_PATH + '/old_entries/'
 # If this changes, then modify `print_password.sh`
-PASSWORD_PATH = '/home/aaron/.passwords/rpad.password'
-PRINT_PASSWORD_PATH = '/home/aaron/Dropbox/Coding/rpad/print_password.sh'
+PASSWORD_PATH = os.path.expanduser("~") + '.passwords/rpad.password'
+PRINT_PASSWORD_PATH = os.path.expanduser("~") + '/Dropbox/Coding/rpad/print_password.sh'
 
 
 def hostname():
@@ -53,6 +53,8 @@ def is_mounted():
 
 
 def vim_input(visibility='Show', initial_message=''):
+    # TODO(agf): This seems to have issues on Mac OS X El Capitan (10.11) with
+    # Vim 7.3. It seems to always return blank text.
     assert visibility == 'Show' or visibility == 'Hide' or visibility == 'Peep'
     with tempfile.NamedTemporaryFile(suffix='.tmp.txt') as tf:
         tf.write(initial_message)
