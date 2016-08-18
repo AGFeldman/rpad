@@ -53,10 +53,8 @@ def is_mounted():
 
 
 def vim_input(visibility='Show', initial_message=''):
-    # TODO(agf): This seems to have issues on Mac OS X El Capitan (10.11) with
-    # Vim 7.3. It seems to always return blank text.
     assert visibility == 'Show' or visibility == 'Hide' or visibility == 'Peep'
-    with tempfile.NamedTemporaryFile(suffix='.tmp.txt') as tf:
+    with tempfile.NamedTemporaryFile(suffix='.tmp.txt', delete=False) as tf:
         tf.write(initial_message)
         tf.flush()
         subprocess.call(['vim',
@@ -69,7 +67,11 @@ def vim_input(visibility='Show', initial_message=''):
                          '-c', 'command Help echo "Hide Show Peep"',
                          '-c', visibility,
                          tf.name])
-        text = tf.read()
+        # Close and re-open the file for changes to be visible on OS X
+        tf.close()
+        with open(tf.name) as f:
+            text = f.read()
+        os.unlink(tf.name)
     return text.strip()
 
 
