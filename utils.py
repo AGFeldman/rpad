@@ -21,8 +21,8 @@ MERGED_RPAD_PATH = DEC_PATH + '/merged_rpad.txt'
 ENTRIES_PATH = DEC_PATH + '/entries/'
 OLD_ENTRIES_PATH = DEC_PATH + '/old_entries/'
 # If this changes, then modify `print_password.sh`
-PASSWORD_PATH = os.path.expanduser("~") + '.passwords/rpad.password'
-PRINT_PASSWORD_PATH = os.path.expanduser("~") + '/Dropbox/Coding/rpad/print_password.sh'
+PASSWORD_PATH = os.path.expanduser("~") + '/.passwords/rpad.password'
+PRINT_PASSWORD_PATH = '/d/Coding/rpad/print_password.sh'
 
 
 def hostname():
