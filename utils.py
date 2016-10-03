@@ -145,17 +145,35 @@ def git_commit(msg):
     # TODO(agf): Return results based on whether this is successful
 
 
+# Get a list of entries that are not yet appended to MERGED_RPAD_PATH
+def get_entry_filenames():
+    entry_filenames = []
+    for f in os.listdir(ENTRIES_PATH):
+        if os.path.isfile(os.path.join(ENTRIES_PATH, f)):
+            entry_filenames.append(f)
+    # Sort entries into ascending order by time
+    entry_filenames.sort(key=lambda f: int(f.split('_')[0]))
+    return entry_filenames
+
+
+# Append the entries to the file at |path|
+def append_entries(path, entry_filenames):
+    with open(path, 'a') as f:
+        for entry_filename in entry_filenames:
+            f.write('\n')
+            with open(os.path.join(ENTRIES_PATH, entry_filename)) as entry_file:
+                for line in entry_file:
+                    f.write(line)
+            f.write('\n')
+
+
 def view_and_maybe_edit():
     if not is_mounted():
         sys.exit(1)
 
     is_consistent_host = hostname() == CONSISTENT_HOST
 
-    # Get a list of entries that are not yet appended to MERGED_RPAD_PATH
-    entry_filenames = []
-    for f in os.listdir(ENTRIES_PATH):
-        if os.path.isfile(os.path.join(ENTRIES_PATH, f)):
-            entry_filenames.append(f)
+    entry_filenames = get_entry_filenames()
 
     tmp_path = tmp_merged_rpad_path()
     shutil.copy2(MERGED_RPAD_PATH, tmp_path)
@@ -164,17 +182,8 @@ def view_and_maybe_edit():
         if is_consistent_host:
             git_commit('state before merging entries')
 
-        # Sort entries into ascending order by time
-        entry_filenames.sort(key=lambda f: int(f.split('_')[0]))
-
         # Append the entries to tmp_rpad
-        with open(tmp_path, 'a') as tmp_rpad:
-            for entry_filename in entry_filenames:
-                tmp_rpad.write('\n')
-                with open(os.path.join(ENTRIES_PATH, entry_filename)) as entry_file:
-                    for line in entry_file:
-                        tmp_rpad.write(line)
-                tmp_rpad.write('\n')
+        append_entries(tmp_path, entry_filenames)
 
         if is_consistent_host:
             shutil.copy2(tmp_path, MERGED_RPAD_PATH)
@@ -191,3 +200,12 @@ def view_and_maybe_edit():
         subprocess.call(['vim', '+', '-M', tmp_path])
 
     os.remove(tmp_path)
+
+
+def dump_plaintext(output_path):
+    if not is_mounted():
+        sys.exit(1)
+    output_path = os.path.expanduser(output_path)
+    shutil.copy2(MERGED_RPAD_PATH, output_path)
+    entry_filenames = get_entry_filenames()
+    append_entries(output_path, entry_filenames)
